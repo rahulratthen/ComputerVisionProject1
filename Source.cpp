@@ -24,6 +24,24 @@ double* xyYToXYZ(double x,double y,double Y)
 	else
 		XYZ[2] = (1-x-y)/y*Y;
 
+	if(y==0)
+		XYZ[0] = XYZ[1] = XYZ[2] = 0;
+	/*
+	if(XYZ[0] < 0)
+		XYZ[0] = 0;
+	else if(XYZ[0] > 1.0)
+		XYZ[0] = 1.0;
+
+	if(XYZ[1] < 0)
+		XYZ[1] = 0;
+	else if(XYZ[1] > 1.0)
+		XYZ[1] = 1.0;
+
+	if(XYZ[2] < 0)
+		XYZ[2] = 0;
+	else if(XYZ[2] > 1.0)
+		XYZ[2] = 1.0;
+		*/
 	return XYZ;
 }
 
@@ -33,13 +51,62 @@ double* LuvToXYZ(double L, double u, double v)
 	//Section 6.2 in Lecture notes
 	double uw=0,vw=0,Xw=0.95,Yw=1.0,Zw=1.09, uPrime=0, vPrime=0;
 	uw = (4*Xw) / (Xw + 15 * Yw + 3 *Zw);
-	vw = (9*Xw) / (Xw + 15 * Yw + 3 *Zw);
+	vw = (9*Yw) / (Xw + 15 * Yw + 3 *Zw);
 
 	uPrime = (u + 13 * uw * L) / 13 * L;
 	vPrime = (v + 13 * vw * L) / 13 * L;
 
-	XYZ[1] = 
+	//Compute Y
+	if(L > 7.9996)
+		Y = pow((L+16)/116,3)*Yw;
+	else
+		Y = L/903.3*Yw;
+
+	//Compute X,Z
+	if(vPrime == 0)
+	{
+		X = 0;
+		Z = 0;
+	}
+	else
+	{
+		X = Y * 2.25 * uPrime/vPrime;
+		Z = Y * (3 - 0.75*uPrime - 5*vPrime)/vPrime;
+	}
+
+	XYZ[0] = X;
+	XYZ[1] = Y;
+	XYZ[2] = Z;
+	/*
+	if(XYZ[0] < 0)
+		XYZ[0] = 0;
+	else if(XYZ[0] > 1.0)
+		XYZ[0] = 1.0;
+
+	if(XYZ[1] < 0)
+		XYZ[1] = 0;
+	else if(XYZ[1] > 1.0)
+		XYZ[1] = 1.0;
+
+	if(XYZ[2] < 0)
+		XYZ[2] = 0;
+	else if(XYZ[2] > 1.0)
+		XYZ[2] = 1.0;
+ */
+	return XYZ;
 }
+
+double GammaCorrection(double D)
+{
+	double result;
+	if(D<0.00304)
+		result = 12.92*D;
+	else
+		result = 1.055*pow(D,1.0/2.4) - 0.055;
+
+	return result;
+}
+
 
 double* XYZTosRGB(double cX, double cY, double cZ)
 {
@@ -73,16 +140,6 @@ double* XYZTosRGB(double cX, double cY, double cZ)
 	return sRGB;
 }
 
-double GammaCorrection(double D)
-{
-	double result;
-	if(D<0.00304)
-		result = 12.92*D;
-	else
-		result = 1.055*pow(D,1/2.4) - 0.055;
-
-	return result;
-}
 
 int main(int argc, char** argv) {
 	if(argc != 3) 

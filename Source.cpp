@@ -47,53 +47,29 @@ double* xyYToXYZ(double x,double y,double Y)
 
 double* LuvToXYZ(double L, double u, double v)
 {
-	double XYZ[3], X=0,Y=0,Z=0;
-	//Section 6.2 in Lecture notes
-	double uw=0,vw=0,Xw=0.95,Yw=1.0,Zw=1.09, uPrime=0, vPrime=0;
+	//http://www.brucelindbloom.com/index.html?Eqn_Luv_to_XYZ.html
+	double XYZ[3];
+	double Y,a,b,c,d,Xw=0.95,Yw=1.0,Zw=1.09,uw,vw;
+
 	uw = (4*Xw) / (Xw + 15 * Yw + 3 *Zw);
 	vw = (9*Yw) / (Xw + 15 * Yw + 3 *Zw);
 
-	uPrime = (u + 13 * uw * L) / 13 * L;
-	vPrime = (v + 13 * vw * L) / 13 * L;
-
-	//Compute Y
 	if(L > 7.9996)
-		Y = pow((L+16)/116,3)*Yw;
+		Y = pow((double)(L+16)/116,3)*Yw;
 	else
 		Y = L/903.3*Yw;
 
-	//Compute X,Z
-	if(vPrime == 0)
-	{
-		X = 0;
-		Z = 0;
-	}
-	else
-	{
-		X = Y * 2.25 * uPrime/vPrime;
-		Z = Y * (3 - 0.75*uPrime - 5*vPrime)/vPrime;
-	}
+	a = 0.333 * (((double)52*L/(u+(13*L*uw)))-1);
+	b = -5*Y;
+	c = -0.333;
+	d = Y * ( ((double)39*L/(v+13*L*vw))-5);
 
-	XYZ[0] = X;
+	XYZ[0] = (double)(d-b)/(a-c);
 	XYZ[1] = Y;
-	XYZ[2] = Z;
-	/*
-	if(XYZ[0] < 0)
-		XYZ[0] = 0;
-	else if(XYZ[0] > 1.0)
-		XYZ[0] = 1.0;
+	XYZ[2] = XYZ[0]*a + b;
 
-	if(XYZ[1] < 0)
-		XYZ[1] = 0;
-	else if(XYZ[1] > 1.0)
-		XYZ[1] = 1.0;
-
-	if(XYZ[2] < 0)
-		XYZ[2] = 0;
-	else if(XYZ[2] > 1.0)
-		XYZ[2] = 1.0;
- */
 	return XYZ;
+
 }
 
 double GammaCorrection(double D)
@@ -102,7 +78,7 @@ double GammaCorrection(double D)
 	if(D<0.00304)
 		result = 12.92*D;
 	else
-		result = 1.055*pow(D,1.0/2.4) - 0.055;
+		result = 1.055*pow(D,(double)1.0/2.4) - 0.055;
 
 	return result;
 }

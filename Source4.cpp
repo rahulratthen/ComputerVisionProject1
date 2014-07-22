@@ -206,6 +206,11 @@ void runOnWindow(int W1,int H1, int W2,int H2, Mat inputImage, char *outName)
 				xyY[2] = 0;
 			else if(xyY[2] >= max)
 				xyY[2] = 1;
+			else
+			{
+				//Perform Linear Scaling
+				xyY[2] = ((xyY[2]-min)*(1)/(max-min));
+			}
 				
 
 			//Converting back to sRGB

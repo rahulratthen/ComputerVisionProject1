@@ -75,6 +75,11 @@ void runOnWindow(int W1,int H1, int W2,int H2, Mat inputImage, char *outName)
 				L[i][j] = 0;
 			else if(L[i][j] >= max)
 				L[i][j] = 100;
+			else
+			{
+				//Perform Linear Scaling
+				L[i][j] = ((L[i][j]-min)*(100)/(max-min));
+			}
 				
 
 		}

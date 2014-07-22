@@ -200,6 +200,7 @@ void runOnWindow(int W1,int H1, int W2,int H2, Mat inputImage, char *outName)
 		HistTable[i][1] = 0;
 	}
 
+
 	for(int i = H1 ; i <= H2 ; i++) 
 	{
 		for(int j = W1 ; j <= W2 ; j++) 
@@ -211,6 +212,12 @@ void runOnWindow(int W1,int H1, int W2,int H2, Mat inputImage, char *outName)
 			//Converting XYZ to Luv
 			double *tXYZ = sRGBToXYZ(r,g,b);
 			double *Luv = XYZToLuv(tXYZ[0],tXYZ[1],tXYZ[2]);
+
+			if(Luv[0]<min)
+				min = Luv[0];
+
+			if(Luv[0]>max)
+				max = Luv[0];
 
 			HistTable[(int)Luv[0]][1]++;
 		}
@@ -236,8 +243,16 @@ void runOnWindow(int W1,int H1, int W2,int H2, Mat inputImage, char *outName)
 		else if(HistTable[i][4] < 0)
 			HistTable[i][4] = 0;
 	}
-	//end of HistTable calculations
 
+	for(int i=0;i<101;i++)
+	{
+		if(i<=min)
+			HistTable[i][4] = 0;
+		else if(i>=max)
+			HistTable[i][4] = 100;
+	}
+	//end of HistTable calculations
+	double maxL=0,minL=100;
 	//Manipulate the image
 	for(int i = 0 ; i < rows ; i++)
 	{
@@ -251,8 +266,15 @@ void runOnWindow(int W1,int H1, int W2,int H2, Mat inputImage, char *outName)
 			double *tXYZ = sRGBToXYZ(r,g,b);
 			double *Luv = XYZToLuv(tXYZ[0],tXYZ[1],tXYZ[2]);
 			
+			
+
 			//Perform Histogram Equalization to the L values in the image based on the HistTable
 			Luv[0] = HistTable[(int)Luv[0]][4];
+
+			if(Luv[0]>maxL)
+				maxL = Luv[0];
+			if(Luv[0]<minL)
+				minL = Luv[0];
 
 			//Converting back to sRGB
 			double *t1XYZ = LuvToXYZ(Luv[0],Luv[1],Luv[2]);
@@ -284,6 +306,7 @@ void runOnWindow(int W1,int H1, int W2,int H2, Mat inputImage, char *outName)
 	Mat outImage;
 	merge(o_planes, 3, outImage);
   
+	cout<<maxL<<"   "<<minL;
 	namedWindow("output", CV_WINDOW_AUTOSIZE);
 	imshow("output", outImage);
 	imwrite(outName, outImage);

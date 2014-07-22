@@ -266,16 +266,20 @@ void runOnWindow(int W1,int H1, int W2,int H2, Mat inputImage, char *outName)
 			double *tXYZ = sRGBToXYZ(r,g,b);
 			double *Luv = XYZToLuv(tXYZ[0],tXYZ[1],tXYZ[2]);
 			
-			
+			double flag = 999999;
+			if(Luv[0]<=min && Luv[0]>=max)
+				flag = Luv[0];
 
 			//Perform Histogram Equalization to the L values in the image based on the HistTable
 			Luv[0] = HistTable[(int)Luv[0]][4];
 
-			if(Luv[0]>maxL)
-				maxL = Luv[0];
-			if(Luv[0]<minL)
-				minL = Luv[0];
-
+			if(flag != 999999)
+			{
+				if(flag<=min)
+					Luv[0] = 0;
+				else if(flag>=max)
+					Luv[0] = 100;
+			}
 			//Converting back to sRGB
 			double *t1XYZ = LuvToXYZ(Luv[0],Luv[1],Luv[2]);
 			double *NewsRGB = XYZTosRGB(t1XYZ[0],t1XYZ[1],t1XYZ[2]);
